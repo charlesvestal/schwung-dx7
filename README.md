@@ -15,7 +15,7 @@ Dexed FM synthesizer module for Ableton Move, using the MSFA engine from Dexed.
 
 ## Prerequisites
 
-- [Move Everything](https://github.com/charlesvestal/move-anything) installed on your Ableton Move
+- [Move Everything](https://github.com/charlesvestal/move-everything) installed on your Ableton Move
 - SSH access enabled: http://move.local/development/ssh
 
 ## Installation
