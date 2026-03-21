@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Dexed FM synthesizer module for Move Anything. Uses the MSFA (Music Synthesizer for Android) engine.
+Dexed FM synthesizer module for Schwung. Uses the MSFA (Music Synthesizer for Android) engine.
 
 ## Build Commands
 
@@ -25,7 +25,7 @@ banks/                  # User .syx files (created on install)
 
 ## DSP Plugin API
 
-Standard Move Anything plugin_api_v2 (multi-instance):
+Standard Schwung plugin_api_v2 (multi-instance):
 - `create_instance()`: Initialize synth, scan banks, load default .syx
 - `destroy_instance()`: Cleanup
 - `on_midi()`: Process MIDI input

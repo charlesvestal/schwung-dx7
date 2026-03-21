@@ -16,31 +16,31 @@ echo "=== Installing Dexed Module ==="
 
 # Deploy to Move - sound_generators subdirectory
 echo "Copying module to Move..."
-ssh ableton@move.local "mkdir -p /data/UserData/move-anything/modules/sound_generators/dexed"
-scp -r dist/dexed/* ableton@move.local:/data/UserData/move-anything/modules/sound_generators/dexed/
+ssh ableton@move.local "mkdir -p /data/UserData/schwung/modules/sound_generators/dexed"
+scp -r dist/dexed/* ableton@move.local:/data/UserData/schwung/modules/sound_generators/dexed/
 
 # Copy banks if included in dist, otherwise create empty directory for user .syx files
 if [ -d "dist/dexed/banks" ] && [ "$(ls -A dist/dexed/banks/*.syx 2>/dev/null)" ]; then
     echo "Installing patch banks..."
-    ssh ableton@move.local "mkdir -p /data/UserData/move-anything/modules/sound_generators/dexed/banks"
-    scp dist/dexed/banks/*.syx ableton@move.local:/data/UserData/move-anything/modules/sound_generators/dexed/banks/
+    ssh ableton@move.local "mkdir -p /data/UserData/schwung/modules/sound_generators/dexed/banks"
+    scp dist/dexed/banks/*.syx ableton@move.local:/data/UserData/schwung/modules/sound_generators/dexed/banks/
 else
     echo "Creating banks directory..."
-    ssh ableton@move.local "mkdir -p /data/UserData/move-anything/modules/sound_generators/dexed/banks"
+    ssh ableton@move.local "mkdir -p /data/UserData/schwung/modules/sound_generators/dexed/banks"
 fi
 
 # Install chain presets if they exist
 if [ -d "src/chain_patches" ]; then
     echo "Installing chain presets..."
-    scp src/chain_patches/*.json ableton@move.local:/data/UserData/move-anything/patches/
+    scp src/chain_patches/*.json ableton@move.local:/data/UserData/schwung/patches/
 fi
 
 # Set permissions so Module Store can update later
 echo "Setting permissions..."
-ssh ableton@move.local "chmod -R a+rw /data/UserData/move-anything/modules/sound_generators/dexed"
+ssh ableton@move.local "chmod -R a+rw /data/UserData/schwung/modules/sound_generators/dexed"
 
 echo ""
 echo "=== Install Complete ==="
-echo "Module installed to: /data/UserData/move-anything/modules/sound_generators/dexed/"
+echo "Module installed to: /data/UserData/schwung/modules/sound_generators/dexed/"
 echo ""
-echo "Restart Move Anything to load the new module."
+echo "Restart Schwung to load the new module."
