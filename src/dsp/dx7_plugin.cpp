@@ -558,6 +558,13 @@ static void v2_select_preset(dx7_instance_t *inst, int index) {
     if (index < 0) index = inst->preset_count - 1;
     if (index >= inst->preset_count) index = 0;
 
+    /* Release any active voices so they don't ring on the new preset */
+    for (int i = 0; i < MAX_VOICES; i++) {
+        if (inst->voice_note[i] >= 0 && inst->voices[i]) {
+            inst->voices[i]->keyup();
+        }
+    }
+
     inst->current_preset = index;
     memcpy(inst->current_patch, inst->patches[index], DX7_PATCH_SIZE);
     strncpy(inst->patch_name, inst->patch_names[index], sizeof(inst->patch_name) - 1);
