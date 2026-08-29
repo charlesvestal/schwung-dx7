@@ -32,6 +32,7 @@
             },
             {
               "key": "output_level",
+              "short_name": "Output",
               "label": "Output",
               "type": "int",
               "min": 0,
@@ -48,6 +49,7 @@
             },
             {
               "key": "algorithm",
+              "short_name": "ALGO",
               "label": "Algorithm",
               "type": "int",
               "min": 1,
@@ -64,6 +66,7 @@
             },
             {
               "key": "osc_sync",
+              "short_name": "Sync",
               "label": "Osc Sync",
               "type": "int",
               "min": 0,
@@ -80,6 +83,7 @@
             },
             {
               "key": "lfo_speed",
+              "short_name": "Spd",
               "label": "LFO Spd",
               "type": "int",
               "min": 0,
@@ -88,6 +92,7 @@
             },
             {
               "key": "lfo_delay",
+              "short_name": "Dly",
               "label": "LFO Dly",
               "type": "int",
               "min": 0,
@@ -96,6 +101,7 @@
             },
             {
               "key": "lfo_pmd",
+              "short_name": "PMD",
               "label": "LFO PMD",
               "type": "int",
               "min": 0,
@@ -104,6 +110,7 @@
             },
             {
               "key": "lfo_amd",
+              "short_name": "AMD",
               "label": "LFO AMD",
               "type": "int",
               "min": 0,
@@ -112,6 +119,7 @@
             },
             {
               "key": "lfo_pms",
+              "short_name": "PMS",
               "label": "LFO PMS",
               "type": "int",
               "min": 0,
@@ -120,6 +128,7 @@
             },
             {
               "key": "lfo_wave",
+              "short_name": "Wave",
               "label": "LFO Wave",
               "type": "int",
               "min": 0,
@@ -128,6 +137,7 @@
             },
             {
               "key": "lfo_sync",
+              "short_name": "Sync",
               "label": "LFO Sync",
               "type": "int",
               "min": 0,
@@ -136,6 +146,7 @@
             },
             {
               "key": "op1_level",
+              "short_name": "Op1",
               "label": "Op1 Lvl",
               "type": "int",
               "min": 0,
@@ -144,6 +155,7 @@
             },
             {
               "key": "op2_level",
+              "short_name": "Op2",
               "label": "Op2 Lvl",
               "type": "int",
               "min": 0,
@@ -152,6 +164,7 @@
             },
             {
               "key": "op3_level",
+              "short_name": "Op3",
               "label": "Op3 Lvl",
               "type": "int",
               "min": 0,
@@ -160,6 +173,7 @@
             },
             {
               "key": "op4_level",
+              "short_name": "Op4",
               "label": "Op4 Lvl",
               "type": "int",
               "min": 0,
@@ -168,6 +182,7 @@
             },
             {
               "key": "op5_level",
+              "short_name": "Op5",
               "label": "Op5 Lvl",
               "type": "int",
               "min": 0,
@@ -176,6 +191,7 @@
             },
             {
               "key": "op6_level",
+              "short_name": "Op6",
               "label": "Op6 Lvl",
               "type": "int",
               "min": 0,
