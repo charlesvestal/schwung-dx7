@@ -47,9 +47,18 @@ echo "Cross prefix: $CROSS_PREFIX"
 mkdir -p build
 mkdir -p dist/dexed
 
+# -fno-gnu-unique on every C++ compile: a DSO that exports any STB_GNU_UNIQUE
+# symbol (function-local statics in inline/template code) is marked NODELETE
+# by glibc, so dlclose never unmaps it and a reload after a module update
+# reuses the old image (and its memory is never freed). Measured on a Move
+# 2026-10-03 with Dexed: after unload+reload the process still mapped the
+# replaced, deleted dsp.so. Verify with:
+#   readelf -W --dyn-syms dsp.so | awk '$5=="UNIQUE"'   (must be empty)
+NO_UNIQUE="-fno-gnu-unique"
+
 # Compile DSP plugin
 echo "Compiling DSP plugin..."
-${CROSS_PREFIX}g++ -g -O3 -shared -fPIC -std=c++14 \
+${CROSS_PREFIX}g++ -g -O3 -shared -fPIC -std=c++14 $NO_UNIQUE \
     src/dsp/dx7_plugin.cpp \
     src/dsp/msfa/dx7note.cc \
     src/dsp/msfa/env.cc \
