@@ -82,6 +82,14 @@ cat src/ui.js > dist/dexed/ui.js
 cat build/dsp.so > dist/dexed/dsp.so
 chmod +x dist/dexed/dsp.so
 
+# Licence texts. The module is GPL-3.0; the msfa FM engine it links is
+# Apache-2.0 (Google, Pascal Gauthier, Jean Pierre Cimalando), whose licence
+# must accompany the binary. Unconditional: a missing file fails the build.
+mkdir -p dist/dexed/licenses
+cat LICENSE > dist/dexed/LICENSE
+cat THIRD_PARTY_LICENSES.md > dist/dexed/THIRD_PARTY_LICENSES.md
+cat licenses/MSFA_APACHE-2.0.txt > dist/dexed/licenses/MSFA_APACHE-2.0.txt
+
 # Copy banks if they exist
 if [ -d "banks" ] && [ "$(ls -A banks/*.syx 2>/dev/null)" ]; then
     echo "Including patch banks..."
