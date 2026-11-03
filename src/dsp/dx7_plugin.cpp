@@ -251,6 +251,7 @@ typedef struct {
     int voice_velocity[MAX_VOICES];
     int voice_age[MAX_VOICES];
     bool voice_sustained[MAX_VOICES];
+    bool voice_keydown[MAX_VOICES];   /* Key still held (true from Note On until Note Off) */
     int age_counter;
     bool sustain_pedal;
 
@@ -563,6 +564,7 @@ static void v2_select_preset(dx7_instance_t *inst, int index) {
         if (inst->voice_note[i] >= 0 && inst->voices[i]) {
             inst->voices[i]->keyup();
         }
+        inst->voice_keydown[i] = false;
     }
 
     inst->current_preset = index;
@@ -598,27 +600,32 @@ static void set_syx_bank_index(dx7_instance_t *inst, int index) {
     plugin_log(msg);
 }
 
-/* v2: Allocate a voice using voice stealing */
-static int v2_allocate_voice(dx7_instance_t *inst) {
-    /* First try to find a free voice */
+/* v2: Allocate a voice using voice stealing.
+ *
+ * Same scoring as upstream Dexed (DexedAudioProcessor::keydown):
+ *   +4 voice is not playing (envelopes finished)
+ *   +2 key is no longer held (releasing)
+ *   +1 same pitch as the new note
+ * Highest score wins; ties go to the voice with the oldest voice_age.
+ * A held voice (score 0 or 1) is only stolen once no released voice is left,
+ * so repeating one note never cuts off a note that is still being held. */
+static int v2_allocate_voice(dx7_instance_t *inst, int note) {
+    int best = 0;
+    int best_score = -1;
     for (int i = 0; i < MAX_VOICES; i++) {
-        if (inst->voice_note[i] < 0) {
-            return i;
-        }
-    }
-
-    /* No free voice, steal the oldest one */
-    int oldest = 0;
-    int oldest_age = inst->voice_age[0];
-    for (int i = 1; i < MAX_VOICES; i++) {
-        if (inst->voice_age[i] < oldest_age) {
-            oldest = i;
-            oldest_age = inst->voice_age[i];
+        int score = 0;
+        if (!inst->voices[i] || !inst->voices[i]->isPlaying()) score += 4;
+        if (!inst->voice_keydown[i])                            score += 2;
+        if (inst->voice_note[i] == note)                        score += 1;
+        if (score > best_score ||
+            (score == best_score && inst->voice_age[i] < inst->voice_age[best])) {
+            best = i;
+            best_score = score;
         }
     }
 
     /* Voice already exists (was allocated at create_instance), just reuse */
-    return oldest;
+    return best;
 }
 
 /* v2: Create instance */
@@ -751,6 +758,7 @@ static void* v2_create_instance(const char *module_dir, const char *json_default
         inst->voice_velocity[i] = 0;
         inst->voice_age[i] = 0;
         inst->voice_sustained[i] = false;
+        inst->voice_keydown[i] = false;
     }
 
     /* Initialize default patch */
@@ -841,12 +849,13 @@ static void v2_on_midi(void *instance, const uint8_t *msg, int len, int source) 
                     if (inst->voice_note[i] >= 0) active_before++;
                 }
 
-                int voice = v2_allocate_voice(inst);
+                int voice = v2_allocate_voice(inst, note);
                 inst->voices[voice]->init(inst->current_patch, note, data2, 0, &inst->controllers);
                 inst->voice_note[voice] = note;
                 inst->voice_velocity[voice] = data2;
                 inst->voice_age[voice] = inst->age_counter++;
                 inst->voice_sustained[voice] = false;
+                inst->voice_keydown[voice] = true;
 
                 /* Only trigger LFO sync on first voice */
                 if (active_before == 0) {
@@ -860,6 +869,7 @@ static void v2_on_midi(void *instance, const uint8_t *msg, int len, int source) 
 
                 for (int i = 0; i < MAX_VOICES; i++) {
                     if (inst->voice_note[i] == note) {
+                        inst->voice_keydown[i] = false;
                         if (inst->sustain_pedal) {
                             inst->voice_sustained[i] = true;
                         } else if (inst->voices[i]) {
@@ -878,6 +888,7 @@ static void v2_on_midi(void *instance, const uint8_t *msg, int len, int source) 
 
                 for (int i = 0; i < MAX_VOICES; i++) {
                     if (inst->voice_note[i] == note) {
+                        inst->voice_keydown[i] = false;
                         if (inst->sustain_pedal) {
                             inst->voice_sustained[i] = true;
                         } else if (inst->voices[i]) {
@@ -907,6 +918,7 @@ static void v2_on_midi(void *instance, const uint8_t *msg, int len, int source) 
                 for (int i = 0; i < MAX_VOICES; i++) {
                     inst->voice_note[i] = -1;
                     inst->voice_sustained[i] = false;
+                    inst->voice_keydown[i] = false;
                 }
                 inst->active_voices = 0;
             }
@@ -1268,6 +1280,7 @@ static void v2_set_param(void *instance, const char *key, const char *val) {
                 if (inst->voice_note[i] >= 0 && inst->voices[i]) {
                     inst->voices[i]->keyup();
                 }
+                inst->voice_keydown[i] = false;
             }
         }
         inst->octave_transpose = v;
@@ -1285,6 +1298,7 @@ static void v2_set_param(void *instance, const char *key, const char *val) {
             }
             inst->voice_note[i] = -1;
             inst->voice_sustained[i] = false;
+            inst->voice_keydown[i] = false;
             inst->voice_age[i] = 0;
         }
         inst->sustain_pedal = false;
@@ -1517,6 +1531,7 @@ static void v2_set_param(void *instance, const char *key, const char *val) {
                 if (inst->voice_note[i] >= 0 && inst->voices[i]) {
                     inst->voices[i]->keyup();
                 }
+                inst->voice_keydown[i] = false;
             }
         }
         inst->transpose = v;
@@ -2319,6 +2334,7 @@ static void v2_render_block(void *instance, int16_t *out, int frames) {
 
                 if (!inst->voices[v]->isPlaying()) {
                     inst->voice_note[v] = -1;  /* Voice finished */
+                    inst->voice_keydown[v] = false;
                 } else {
                     inst->active_voices++;
                 }
